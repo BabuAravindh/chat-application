@@ -1,23 +1,23 @@
+import React, { useEffect, useRef, useState } from 'react';
+import './chat.css';
+import EmojiPicker from 'emoji-picker-react';
 
-import { useState } from 'react'
-import './chat.css'
-import EmojiPicker from 'emoji-picker-react'
+const Chat = ({ onLoginSuccess, onLogout }) => {
+  const [open, setOpen] = useState(false);
+  const [Text, setText] = useState('');
+  const endref = useRef(null);
 
-const Chat = () => {
+  useEffect(() => {
+    endref.current?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
 
-  const [open ,setOpen] =useState(false)
-  const [Text,setText]= useState('')
-
-const handleEmoji = e => {
-     setText((prev) => prev + e.emoji)
-     setOpen(false)
-}
+  const handleEmoji = (e) => {
+    setText((prev) => prev + e.emoji);
+    setOpen(false);
+  };
 
   return (
-    <div className='chat'>
-
-
-      {/* ------------------------------------top section---------------------------------------------- */}
+    <div className="chat">
       <div className="top">
         <div className="user">
           <img src="/src/assests/avatar.jpg" alt="" />
@@ -28,7 +28,7 @@ const handleEmoji = e => {
           <div className="icons">
             <img src="/src/assests/phone.png" alt="" />
             <img src="/src/assests/video.png" alt="" />
-            <img src="/src/assests/info.png" alt="" />
+            <img src="/src/assests/turn-off.png" alt="" onClick={onLogout} />
           </div>
         </div>
       </div>
@@ -84,6 +84,7 @@ const handleEmoji = e => {
             <span>1 min age</span>
           </div>
         </div>
+        <div ref={endref}></div>
       </div>
 
 
@@ -148,7 +149,7 @@ const handleEmoji = e => {
           <EmojiPicker open= {open} onEmojiClick={handleEmoji}/>
           </div>
         </div>
-        <buttton className="sendButton">Send</buttton>
+        <button className="sendButton">Send</button>
       </div>
     </div>
   )

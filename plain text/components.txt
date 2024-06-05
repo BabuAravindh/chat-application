@@ -1,0 +1,184 @@
+/---------------------------List component----------------------------------------/
+
+import  { useState, useEffect } from 'react';
+import axios from 'axios';
+
+const ChatComponent = () => {
+  const [users, setUsers] = useState([]);
+  const [chated, setChated] = useState([]);
+  const [timeNow, setTimeNow] = useState('');
+  const [received, setReceived] = useState('');
+  const [sended, setSended] = useState('');
+  const [userNow, setUserNow] = useState('');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch users data
+        const usersResponse = await axios.get('/api/users');
+        setUsers(usersResponse.data);
+
+        // Fetch chat data
+        const chatedResponse = await axios.get('/api/chated');
+        setChated(chatedResponse.data);
+
+        // Fetch time_now
+        const timeNowResponse = await axios.get('/api/time_now');
+        setTimeNow(timeNowResponse.data);
+
+        // Fetch received
+        const receivedResponse = await axios.get('/api/received');
+        setReceived(receivedResponse.data);
+
+        // Fetch sended
+        const sendedResponse = await axios.get('/api/sended');
+        setSended(sendedResponse.data);
+
+        // Fetch user_now
+        const userNowResponse = await axios.get('/api/user_now');
+        setUserNow(userNowResponse.data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  return (
+    <div>
+      {/* Render UI elements using the fetched data */}
+      <div className="nav-bar">
+        <div>
+          <img className="logo" src="/chat-bubbles.png" alt="Chat Logo" />
+          <h2 className="logo-title">Chatiii</h2>
+        </div>
+        <ul>
+          <h3 className="time-now">{timeNow}</h3>
+          <li><a href="#"><img src="/camera (1).png" className="nav-icons" alt="Camera Icon" /></a></li>
+          <li><a href="#"><img src="/search.png" className="nav-icons" alt="Search Icon" /></a></li>
+          <li><a href="#"><img src="/dots.png" className="nav-icons" alt="Dots Icon" /></a></li>
+        </ul>
+      </div>
+      
+      {/* Render other UI elements similarly */}
+
+      {/* Render users */}
+      <div className="contacts">
+        {users.map(user => (
+          <a key={user.username} href={`/chat/${user.username}`} className="contact-link">
+            <div className="contact">
+              <img src="/girl.jpg" className="contact-img" alt="User Avatar" />
+              <div>
+                <h2 className="contact-name">{user.username}</h2>
+                {/* Render recent chat, time, etc. if needed */}
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+
+      {/* Render chated */}
+      <div className="chat-container">
+        {chated.map(chat => (
+          <div key={chat.id} className="chat">
+            {/* Render chat messages */}
+          </div>
+        ))}
+      </div>
+
+      {/* Render chat area */}
+      <div className="chat-area">
+        <form action="/send" method="post" className="send-form">
+          <input type="text" name="message" autoFocus autoComplete="false" />
+          <button type="submit" className="send-btn"><img src="/send.png" className="send" alt="Send Icon" /></button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default ChatComponent;
+
+--------------------------------------------------------------------------------------------
+
+
+/--------------------------------------chatList component---------------------------/
+
+import  { useState } from 'react';
+import './ChatList.css';
+
+const ChatList = ({ users, chated, sended, user_now, received }) => {
+  const [addMode, setAddMode] = useState(false);
+
+  return (
+    <div className='chatlist'>
+      <div className="search">
+        <div className="searchbar">
+          <img src='/src/assests/search.png' alt="" /> 
+          <input type="text" placeholder='search' />
+        </div>
+        <img src={addMode ? '/src/assests/plus.png' : '/src/assests/minus.png'} alt="plus" className='add' onClick={() => setAddMode((prev) => !prev)} />
+      </div>
+
+      {/* Render contacts */}
+      <div className="contacts">
+        {users && users.map((user) => (
+          <a href={`/chat/${user.username}`} className="contact-link" key={user.username}>
+            <div className="contact">
+              <img src="/girl.jpg" className="contact-img" alt="User Avatar" />
+              <div>
+                <h2 className="contact-name">{user.username}</h2>
+                {user.username === chated[0].username && chated[0].recentchat && (
+                  <p className="message">{chated[0].recentchat}</p>
+                )}
+              </div>
+              {chated[0].Time && <p className="time">{chated[0].Time}</p>}
+            </div>
+          </a>
+        ))}
+      </div>
+
+      {/* Render contact-bar */}
+      {received && (
+        <div className="contact-bar">
+          <img className="contact-img" src="/boy.jpg" alt="Contact Avatar" />
+          <div>
+            <div className="sender-container">
+              <h2 className="sender-name">{received}</h2>
+            </div>
+            <p className="status"></p>
+          </div>
+        </div>
+      )}
+
+      {/* Render chat-container */}
+      <div className="chat-container">
+        {chated.map((chat) => (
+          <div className="chat" key={chat.id}>
+            {sended && user_now && chat.username === sended && chat.reciever === user_now && (
+              <p className="chat-message">{chat.chat}{chat.chat.length >= 50 && <br />}<em className="chat-time">{chat.time}</em></p>
+            )}
+            {received && user_now && chat.username === user_now && chat.reciever === received && (
+              <p className="chat-message">{chat.chat}{chat.chat.length >= 50 && <br />}<em className="chat-time">{chat.time}</em></p>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Chat area for sending messages */}
+      <div className="chat-area">
+        <form action="/send" method="post" className="send-form">
+          <input type="text" name="message" autoFocus autoComplete="false" />
+          <button type="submit" className="send-btn"><img src="/send.png" className="send" alt="Send Icon" /></button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default ChatList;
+
+
+--------------------------------------------------------------------------------------------
+
