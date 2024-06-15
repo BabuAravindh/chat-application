@@ -20,59 +20,69 @@ const Login = ({ onLoginSuccess }) => {
     const handleSignIn = async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
+        
         try {
-          const response = await axios.post('http://localhost:4040/', formData);
-          console.log(response.data);
-          // Call onLoginSuccess function to set isLoggedIn state to true
-          onLoginSuccess();
-        } catch (error) {
-          console.error('Error signing in:', error);
-        }
-      };
-
-
-    const handleSignUp = async (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        try {
-            const response = await axios.post('http://localhost:4040/signup', formData);
-            console.log(response.data);
-            // Call onLoginSuccess function to set isLoggedIn state to true
-            onLoginSuccess();
-            // Reload the page to trigger rendering of List and Chat components
-            window.location.reload();
-        } catch (error) {
-            console.error('Error signing up:', error);
-        }
+            const response = await axios.post('http://localhost:4040/', formData);
+            if (response.data.success)
+                if (response.data.success) {
+                    console.log("Login successful");
+                    onLoginSuccess(); // Trigger the parent component's login success handler
+                } else {
+                    console.error(response.data.message);
+                }
+            } catch (error) {
+                console.error('Error signing in:', error);
+            }
+        };
+        
+    
+        const handleSignUp = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+    
+            try {
+                const signUpUrl = 'http://localhost:4040/signup';
+                const response = await axios.post(signUpUrl, formData);
+                if (response.data.success) {
+                    console.log("Signup successful");
+                    onLoginSuccess();
+                    window.location.reload(); // Reload the page after signup
+                } else {
+                    console.error(response.data.message);
+                }
+            } catch (error) {
+                console.error('Error signing up:', error);
+            }
+        };
+    
+        return (
+            <div className="login">
+                <div className="item">
+                    <h2>Welcome Back</h2>
+                    <form onSubmit={handleSignIn}>
+                        <input type="text" placeholder="username" name="user" required />
+                        <input type="password" placeholder="password" name="pass" required />
+                        <button type="submit">Sign In</button>
+                    </form>
+                </div>
+                <div className="separator"></div>
+                <div className="item">
+                    <h2>Create an Account</h2>
+                    <form onSubmit={handleSignUp}>
+                        <label htmlFor="file">
+                            <img src={avatar.url || "/src/assets/avatar.jpg"} alt="avatar" />
+                            Upload an image
+                        </label>
+                        <input type="file" id="file" style={{ display: "none" }} onChange={handleAvatar} required />
+                        <input type="text" placeholder="username" name="user" required />
+                        <input type="email" placeholder="email" name="email" required />
+                        <input type="password" placeholder="password" name="pass" required />
+                        <button type="submit">Sign Up</button>
+                    </form>
+                </div>
+            </div>
+        );
     };
-
-    return (
-        <div className="login">
-            <div className="item">
-                <h2>welcome back</h2>
-                <form onSubmit={handleSignIn}>
-                    <input type="text" placeholder='email' name='user' />
-                    <input type="password" placeholder='password' name='pass' />
-                    <button type="submit">sign in </button>
-                </form>
-            </div>
-            <div className="seperator"></div>
-            <div className="item">
-                <h2>create an Account</h2>
-                <form onSubmit={handleSignUp}>
-                    <label htmlFor="file">
-                        <img src={avatar.url || "/src/assests/avatar.jpg"} alt="" />
-                        upload an image
-                    </label>
-                    <input type="file" id='file' style={{ display: "none" }} onChange={handleAvatar} />
-                    <input type="text" placeholder='username' name='user' />
-                    <input type="text" placeholder='email' name='email' />
-                    <input type="password" placeholder='password' name='pass' />
-                    <button type="submit">sign up </button>
-                </form>
-            </div>
-        </div>
-    );
-};
-
-export default Login;
+    
+    export default Login;
+    

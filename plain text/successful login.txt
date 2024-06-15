@@ -1,0 +1,73 @@
+import React, { useState } from 'react';
+import axios from 'axios';
+
+const Login = () => {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [retypePassword, setRetypePassword] = useState('');
+  const [isLogin, setIsLogin] = useState(true); // State to track whether to show login or signup form
+  const [error, setError] = useState('');
+
+  const handleSignIn = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('http://localhost:4040/', { user: username, pass: password }); // Update URL
+      const data = response.data;
+      if (data.success) {
+        // Login successful, handle accordingly
+        console.log('Login successful');
+      } else {
+        // Login failed, display error message
+        console.log("username and password is wrong")
+        setError(data.message);
+      }
+    } catch (error) {
+      console.error('Error signing in:', error);
+    }
+  };
+
+  const handleSignUp = async (e) => {
+    e.preventDefault();
+    if (password !== retypePassword) {
+      setError('Passwords do not match');
+      return;
+    }
+    try {
+      const response = await axios.post('http://localhost:4040/signup', { user: username, pass: password }); // Update URL
+      const data = response.data;
+      if (data.success) {
+        console.log("Signup successful");
+        // Redirect or perform any other action upon successful signup
+      } else {
+        setError(data.message);
+      }
+    } catch (error) {
+      console.error('Error signing up:', error);
+    }
+  };
+  
+  
+  return (
+    <div>
+      <h2>{isLogin ? 'Login' : 'Sign Up'}</h2>
+      {error && <p>{error}</p>}
+      <form onSubmit={isLogin ? handleSignIn : handleSignUp}>
+        <input type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} required />
+        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        {!isLogin && (
+          <input
+            type="password"
+            placeholder="Retype Password"
+            value={retypePassword}
+            onChange={(e) => setRetypePassword(e.target.value)}
+            required
+          />
+        )}
+        <button type="submit">{isLogin ? 'Sign In' : 'Sign Up'}</button>
+      </form>
+      <button onClick={() => setIsLogin(!isLogin)}>{isLogin ? 'Switch to Sign Up' : 'Switch to Login'}</button>
+    </div>
+  );
+};
+
+export default Login;

@@ -1,14 +1,15 @@
+import React from 'react';
+import './list.css';
+import UserInfo from './UserInfo/UserInfo';
+import ChatList from './chatList/ChatList';
 
-import './list.css'
-import UserInfo from './UserInfo/UserInfo'
-import ChatList from './chatList/ChatList'
 const List = () => {
   return (
     <div className='list'>
-      <UserInfo/>
-      <ChatList/>
+      <UserInfo />
+      <ChatList />
     </div>
-  )
-}
+  );
+};
 
-export default List
+export default List;

@@ -1,48 +1,87 @@
-import React, { useState } from 'react'
-import './Login.css'
+import React, { useState } from 'react';
+import './Login.css';
+import axios from 'axios';
 
-const Login = () => {
+const Login = ({ onLoginSuccess }) => {
+  const [avatar, setAvatar] = useState({
+    file: null,
+    url: ''
+  });
+  const [loginError, setLoginError] = useState(null);
+  const [signupError, setSignupError] = useState(null);
 
- const [avatar,setAvatar] = useState({
-    file:null,
-    url:""
- })
- 
- const handleAvatar = e => {
-    if(e.target.files[0]){
-    setAvatar({
-        file:e.target.files[0],
-        url:URL.createObjectURL(e.target.files[0])
-    })
+  const handleAvatar = e => {
+    if (e.target.files[0]) {
+      setAvatar({
+        file: e.target.files[0],
+        url: URL.createObjectURL(e.target.files[0])
+      });
     }
- }
+  };
+
+  const handleSignIn = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    try {
+      const response = await axios.post('http://localhost:4040/login', formData);
+      console.log(response.data);
+      if (response.data.success) {
+        onLoginSuccess();
+      } else {
+        setLoginError(response.data.message);
+      }
+    } catch (error) {
+      console.error('Error signing in:', error);
+    }
+  };
+
+  const handleSignUp = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    try {
+      const response = await axios.post('http://localhost:4040/signup', formData);
+      console.log(response.data);
+      if (response.data.success) {
+        onLoginSuccess();
+        window.location.reload();
+      } else {
+        setSignupError(response.data.message);
+      }
+    } catch (error) {
+      console.error('Error signing up:', error);
+    }
+  };
 
   return (
-     <div className="login">
-        <div className="item">
-            <h2>welcome back</h2>
-            <form>
+    <div className="login">
+      <div className="item">
+        <h2>Welcome Back</h2>
+        <form onSubmit={handleSignIn} method='post' action='/'>
+          <input type="text" placeholder='Username' name='user' required />
+          <input type="password" placeholder='Password' name='pass' required />
+          {loginError && <p className="error">{loginError}</p>}
+          <button type="submit">Sign In</button>
+        </form>
+      </div>
+      <div className="separator"></div>
+      <div className="item">
+        <h2>Create an Account</h2>
+        <form onSubmit={handleSignUp} method='get' action='/signup'>
+          <label htmlFor="file">
+            <img src={avatar.url || "/src/assets/avatar.jpg"} alt="" />
+            Upload an image
+          </label>
+          <input type="file" id='file' style={{ display: "none" }} onChange={handleAvatar} />
+          <input type="text" placeholder='Username' name='user' required />
+          <input type="text" placeholder='Email' name='email' />
+          <input type="password" placeholder='Password' name='pass' required />
+          <input type="password" placeholder='Retype Password' name='retype' required />
+          {signupError && <p className="error">{signupError}</p>}
+          <button type="submit">Sign Up</button>
+        </form>
+      </div>
+    </div>
+  );
+};
 
-                <input type="text" placeholder='email' name='email' />
-                <input type="password" placeholder='password' name='password' />
-                <button>sign in </button>
-            </form>
-        </div>
-        <div className="seperator"></div>
-        <div className="item">
-        <h2>create an Account</h2>
-        <form>
-            <label htmlFor="file">  <img src={avatar.url || "/src/assests/avatar.jpg"} alt="" />
-            upload an image</label>
-        <input type="file"  id='file' style={{display :"none"}} onChange={handleAvatar}/>
-<input type="text" placeholder='username' name='username' />
-<input type="text" placeholder='email' name='email' />
-<input type="password" placeholder='password' name='password' />
-<button>sign in </button>
-</form>
-        </div>
-     </div>
-  )
-}
-
-export default Login
+export default Login;

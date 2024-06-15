@@ -1,0 +1,63 @@
+import express from 'express';
+import bodyParser from 'body-parser';
+import { Pool } from 'pg'; // Ensure you have installed 'pg' package
+
+const app = express();
+const port = 4040;
+
+const pool = new Pool({
+  user: 'yourusername',
+  host: 'localhost',
+  database: 'yourdatabase',
+  password: 'yourpassword',
+  port: 5432,
+});
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+app.set('view engine', 'ejs');
+
+app.get("/", (req, res) => {
+  res.render("login.ejs");
+});
+
+app.post("/", async (req, res) => {
+  const user = req.body.user;
+  const pass = req.body.pass;
+
+  try {
+    const result = await pool.query('SELECT * FROM users WHERE username = $1', [user]);
+    if (result.rows.length > 0) {
+      const finded = result.rows[0];
+      if (finded.passkey === pass) {
+        const contactResult = await pool.query('SELECT * FROM users WHERE username != $1', [user]);
+        const contact_records = contactResult.rows;
+
+        appuser = user;
+        res.redirect("/contacts");
+      } else {
+        res.render("login.ejs", { error: "yes", name: user });
+      }
+    } else {
+      res.render("login.ejs", { nouser: "yes" });
+    }
+  } catch (error) {
+    console.error("Error logging in:", error);
+    res.render("login.ejs", { error: "yes", name: user });
+  }
+});
+
+app.post("/signup", async (req, res) => {
+  const user = req.body.user;
+  const email = req.body.email;
+  const pass = req.body.pass;
+
+  try {
+    await pool.query('INSERT INTO users (username, email, passkey) VALUES ($1, $2, $3)', [user, email, pass]);
+    res.json({ message: "Signup successful", user: { username: user, email: email } });
+  } catch (error) {
+    console.error("Error signing up:", error);
+    res.status(500).json({ error: "Error signing up" });
+  }
+});

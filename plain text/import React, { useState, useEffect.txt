@@ -1,0 +1,67 @@
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
+import axios from 'axios'; // Import axios
+import './App.css';
+import Chat from './components/chat/Chat';
+import List from './components/list/List';
+import Login from './components/login/Login';
+
+
+function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Check if the user is logged in from localStorage
+    const loggedIn = localStorage.getItem('isLoggedIn');
+    if (loggedIn === 'true') {
+      setIsLoggedIn(true);
+    }
+  }, []);
+
+  // Function to handle login success
+  const handleLoginSuccess = () => {
+    setIsLoggedIn(true);
+    // Store login state in localStorage
+    localStorage.setItem('isLoggedIn', 'true');
+  };
+  const handleSignIn = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    try {
+      const response = await axios.post('http://localhost:4040/login', formData);
+      const data = response.data;
+      if (data.success) {
+        // Login successful, handle accordingly
+        onLoginSuccess();
+      } else {
+        // Login failed, display error message
+        console.error("Login failed:", data.message);
+      }
+    } catch (error) {
+      console.error('Error signing in:', error);
+    }
+  };
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    // Remove login state from localStorage
+    localStorage.removeItem('isLoggedIn');
+  };
+
+  return (
+    <Router>
+      <div className="container">
+        <Route exact path="/">
+          {isLoggedIn ? <Redirect to="/contacts" /> : <Login onLoginSuccess={handleLoginSuccess} />}
+        </Route>
+        <Route path="/contacts">
+          {isLoggedIn ? <List /> : <Redirect to="/" />}
+        </Route>
+        <Route path="/chat">
+          {isLoggedIn ? <Chat onLogout={handleLogout} /> : <Redirect to="/" />}
+        </Route>
+      </div>
+    </Router>
+  );
+}
+
+export default App;
